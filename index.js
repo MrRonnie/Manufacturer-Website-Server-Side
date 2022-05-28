@@ -43,6 +43,12 @@ async function run() {
       res.send(item);
     });
 
+    // get all the orders
+    app.get("/orders", verifyJWT, verifyAdmin, async (req, res) => {
+      const result = await orderCollection.find({}).toArray();
+      res.send(result);
+    });
+
     // ----------------
   } finally {
   }
