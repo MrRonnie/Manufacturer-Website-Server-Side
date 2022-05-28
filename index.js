@@ -22,16 +22,28 @@ async function run() {
   try {
     await client.connect();
 
-    // All the Collections
+    // All Collections
     const productCollection = client
       .db("manufacturer-website")
       .collection("products");
 
-    //to get all the products
+    //get all products
     app.get("/products", async (req, res) => {
-      const result = await productCollection.find({}).toArray();
-      res.send(result);
+      const query = {};
+      const cursor = productCollection.find(query);
+      const items = await cursor.toArray();
+      res.send(items);
     });
+
+    //get one particular product
+    app.get("/item/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const item = await productCollection.findOne(query);
+      res.send(item);
+    });
+
+    // ----------------
   } finally {
   }
 }
