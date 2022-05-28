@@ -44,15 +44,23 @@ async function run() {
     });
 
     //get all the orders
-    app.get("/orders", verifyJWT, verifyAdmin, async (req, res) => {
+    app.get("/orders", async (req, res) => {
       const result = await orderCollection.find({}).toArray();
       res.send(result);
     });
 
     //add order in the db
-    app.post("/order", verifyJWT, async (req, res) => {
+    app.post("/order", async (req, res) => {
       const order = req.body;
       const result = await orderCollection.insertOne(order);
+      res.send(result);
+    });
+
+    //get one orders
+    app.get("/order", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await orderCollection.find(query).toArray();
       res.send(result);
     });
 
