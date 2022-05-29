@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const { ObjectID } = require("bson");
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -35,12 +36,31 @@ async function run() {
       .db("manufacturer-website")
       .collection("users");
 
+    const feedbackCollection = client
+      .db("manufacturer-website")
+      .collection("feedbacks");
+
     //get all products
     app.get("/products", async (req, res) => {
       const query = {};
       const cursor = productCollection.find(query);
       const items = await cursor.toArray();
       res.send(items);
+    });
+
+    //add new product in db
+    app.post("/product", async (req, res) => {
+      const newProduct = req.body;
+      const result = await productCollection.insertOne(newProduct);
+      res.send(result);
+    });
+
+    // delete one product from the db
+    app.delete("/product/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productCollection.deleteOne(query);
+      res.send(result);
     });
 
     //get one particular product
@@ -64,6 +84,83 @@ async function run() {
       res.send(result);
     });
 
+    //delete one order
+    app.delete("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //get one particular order for payment
+    app.get("/oneOrder/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.findOne(query);
+      res.send(result);
+    });
+
+    // update one order after payment
+    app.put("/oneOrder/:id", async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: "Pending",
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+
+      const result = await orderCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    // update status to Shipped
+    app.put(
+      "/updateToShipped/:id",
+
+      async (req, res) => {
+        const id = req.params.id;
+        console.log(id);
+        const filter = { _id: ObjectId(id) };
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: { status: "Shipped" },
+        };
+        const result = await orderCollection.updateOne(
+          filter,
+          updateDoc,
+          options
+        );
+        res.send(result);
+      }
+    );
+    //create JWT and add users to the userCollection
+    app.put("/token", async (req, res) => {
+      const email = req.query.email;
+      const token = jwt.sign({ email: email }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
+      const filter = { email: email };
+      const options = { upsert: true };
+
+      const updateDoc = {
+        $set: {
+          email: email,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send({ token });
+    });
+
     //get one orders
     app.get("/order", async (req, res) => {
       const email = req.query.email;
@@ -82,7 +179,7 @@ async function run() {
       }
     });
 
-    // Update user's profile
+    //to update user's profile
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const updatedInfo = req.body;
@@ -93,6 +190,51 @@ async function run() {
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
+    });
+
+    //to patch or update one user (to set admin)
+    app.patch("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+
+      res.send(result);
+    });
+
+    //to get all the users
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    //to get all the feedbacks
+    app.get("/feedbacks", async (req, res) => {
+      const result = await feedbackCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    //to add new feedback
+    app.post("/feedbacks", async (req, res) => {
+      const review = req.body;
+      const result = await feedbackCollection.insertOne(review);
+      res.send(result);
+    });
+
+    // to get one user to check if admin or not
+    app.get("/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      if (user?.role === "admin") {
+        res.send(true);
+      } else {
+        res.send(false);
+      }
     });
 
     // ----------------
