@@ -193,7 +193,7 @@ async function run() {
       }
     });
 
-    //to update user's profile
+    //update user's profile
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
       const updatedInfo = req.body;
@@ -206,7 +206,7 @@ async function run() {
       res.send(result);
     });
 
-    //to patch or update one user (to set admin)
+    // patch or update one user (to set admin)
     app.patch("/user/:email", async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
@@ -220,26 +220,26 @@ async function run() {
       res.send(result);
     });
 
-    //to get all the users
+    // get all the users
     app.get("/users", async (req, res) => {
       const result = await userCollection.find({}).toArray();
       res.send(result);
     });
 
-    //to get all the feedbacks
+    // get all the feedbacks
     app.get("/feedbacks", async (req, res) => {
       const result = await feedbackCollection.find({}).toArray();
       res.send(result);
     });
 
-    //to add new feedback
+    //add new feedback
     app.post("/feedbacks", async (req, res) => {
       const review = req.body;
       const result = await feedbackCollection.insertOne(review);
       res.send(result);
     });
 
-    // to get one user to check if admin or not
+    //get one user to check if admin or not
     app.get("/admin/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
