@@ -31,6 +31,10 @@ async function run() {
       .db("manufacturer-website")
       .collection("orders");
 
+    const userCollection = client
+      .db("manufacturer-website")
+      .collection("users");
+
     //get all products
     app.get("/products", async (req, res) => {
       const query = {};
@@ -40,7 +44,7 @@ async function run() {
     });
 
     //get one particular product
-    app.get("/oneitem/:id", async (req, res) => {
+    app.get("/item/:id", async (req, res) => {
       const itemId = req.params.id;
       const query = { _id: ObjectId(itemId) };
       const result = await productCollection.findOne(query);
@@ -66,6 +70,16 @@ async function run() {
       const query = { email: email };
       const result = await orderCollection.find(query).toArray();
       res.send(result);
+    });
+
+    // Get one user
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      if (email) {
+        const query = { email: email };
+        const result = await userCollection.findOne(query);
+        res.send(result);
+      }
     });
 
     // ----------------
