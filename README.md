@@ -6,7 +6,11 @@ A Manufacturer Website is a website that provides inventory analysis, payment, o
 
 ### Live client site link:
 
+https://manufacturer-website-86e6d.web.app/
+
 ### Live server site link:
+
+https://rocky-dawn-14713.herokuapp.com/
 
 ## Features
 
