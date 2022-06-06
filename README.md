@@ -12,6 +12,11 @@ https://manufacturer-website-86e6d.web.app/
 
 https://rocky-dawn-14713.herokuapp.com/
 
+### Admin Credentials
+
+Email: hero@pro.com
+Password : hero123456
+
 ## Features
 
 This website has some pages. Some pages are public and some are protected with private routes, which means user needs to be logged in to access those features and need a valid account.
